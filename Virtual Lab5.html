@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Lab: Uji Elektrolit</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --panel: #ffffff;
+            --accent: #3498db;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Bagian Atas: Rak Botol */
+        .shelf-container {
+            background: var(--panel);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .shelf-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .shelf {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .bottle {
+            padding: 12px 5px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .bottle:active {
+            transform: scale(0.95);
+            background: #eef6ff;
+            border-color: var(--accent);
+        }
+
+        /* Bagian Tengah: Alat Uji */
+        .lab-setup {
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        #bulb {
+            width: 50px;
+            height: 50px;
+            background: #ccc;
+            border-radius: 50% 50% 40% 40%;
+            position: absolute;
+            top: 20px;
+            transition: 0.3s;
+        }
+        #bulb.strong { background: #ffeb3b; box-shadow: 0 0 40px #ffeb3b; }
+        #bulb.weak { background: #ffd54f; box-shadow: 0 0 15px #ffd54f; }
+
+        .beaker {
+            width: 140px;
+            height: 120px;
+            border: 4px solid #999;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            background: rgba(255,255,255,0.8);
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: #a2d2ff;
+            transition: height 0.6s ease;
+            opacity: 0.7;
+        }
+
+        .electrode {
+            width: 10px;
+            height: 110px;
+            background: #333;
+            position: absolute;
+            bottom: 50px;
+        }
+        .el-l { left: 40%; transform: translateX(-20px); }
+        .el-r { right: 40%; transform: translateX(20px); }
+
+        /* Mikro & Info */
+        .info-panel {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+
+        .micro-view {
+            height: 80px;
+            background: #1a252f;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ion {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            font-size: 7px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: move 2s infinite alternate;
+        }
+        .ion-p { background: #ff4757; }
+        .ion-n { background: #2ed573; }
+        .mol { background: #747d8c; border-radius: 2px; width: 12px; height: 12px; }
+
+        @keyframes move {
+            from { transform: translate(0,0); }
+            to { transform: translate(10px, 10px); }
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #rx-text {
+            font-family: monospace;
+            color: #00ff00;
+            display: block;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="margin: 10px 0 5px 0;">🧪 Virtual Lab Elektrolit</h2>
+    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Ketuk botol untuk menguji larutan</p>
+
+    <div class="main-container">
+        <div class="shelf-container">
+            <div class="shelf-title">Pilih Larutan:</div>
+            <div class="shelf">
+                <div class="bottle" onclick="test('NaCl', 'strong', 'NaCl → Na⁺ + Cl⁻')">NaCl</div>
+                <div class="bottle" onclick="test('HCl', 'strong', 'HCl → H⁺ + Cl⁻')">HCl</div>
+                <div class="bottle" onclick="test('NaOH', 'strong', 'NaOH → Na⁺ + OH⁻')">NaOH</div>
+                <div class="bottle" onclick="test('CH3COOH', 'weak', 'CH3COOH ⇌ CH3COO⁻ + H⁺')">CH3COOH</div>
+                <div class="bottle" onclick="test('NH3', 'weak', 'NH3 + H2O ⇌ NH4⁺ + OH⁻')">NH3</div>
+                <div class="bottle" onclick="test('Glukosa', 'none', 'C6H12O6')">Glukosa</div>
+            </div>
+        </div>
+
+        <div class="lab-setup">
+            <div id="bulb"></div>
+            <div class="electrode el-l"></div>
+            <div class="electrode el-r"></div>
+            <div class="beaker">
+                <div id="liquid" class="liquid"></div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="micro-view" id="micro-view">
+                <span id="placeholder-text" style="color: #555;">Tampilan Mikro</span>
+            </div>
+            <strong>Reaksi:</strong>
+            <span id="rx-text">---</span>
+            <button class="reset-btn" onclick="reset()">Kosongkan Gelas</button>
+        </div>
+    </div>
+
+    <script>
+        function test(name, type, rx) {
+            const liquid = document.getElementById('liquid');
+            const bulb = document.getElementById('bulb');
+            const micro = document.getElementById('micro-view');
+            const rxText = document.getElementById('rx-text');
+
+            // Reset tampilan
+            liquid.style.height = "0%";
+            bulb.className = '';
+            micro.innerHTML = '';
+            
+            // Animasi menuang
+            setTimeout(() => {
+                liquid.style.height = "80%";
+                rxText.innerText = rx;
+                
+                setTimeout(() => {
+                    if(type === 'strong') {
+                        bulb.classList.add('strong');
+                        genParticles(12, 'ion');
+                    } else if(type === 'weak') {
+                        bulb.classList.add('weak');
+                        genParticles(6, 'mix');
+                    } else {
+                        genParticles(8, 'mol');
+                    }
+                }, 600);
+            }, 100);
+        }
+
+        function genParticles(count, mode) {
+            const micro = document.getElementById('micro-view');
+            for(let i=0; i<count; i++) {
+                if(mode === 'ion' || mode === 'mix') {
+                    createEl(micro, 'ion ion-p', '+');
+                    createEl(micro, 'ion ion-n', '-');
+                }
+                if(mode === 'mol' || mode === 'mix') {
+                    createEl(micro, 'ion mol', '');
+                }
+            }
+        }
+
+        function createEl(parent, cls, txt) {
+            const div = document.createElement('div');
+            div.className = cls;
+            div.innerText = txt;
+            div.style.left = Math.random() * 90 + '%';
+            div.style.top = Math.random() * 70 + '%';
+            div.style.animationDelay = Math.random() * 2 + 's';
+            parent.appendChild(div);
+        }
+
+        function reset() {
+            document.getElementById('liquid').style.height = "0%";
+            document.getElementById('bulb').className = '';
+            document.getElementById('micro-view').innerHTML = '<span style="color: #555;">Tampilan Mikro</span>';
+            document.getElementById('rx-text').innerText = '---';
+        }
+    </script>
+</body>
+</html>
